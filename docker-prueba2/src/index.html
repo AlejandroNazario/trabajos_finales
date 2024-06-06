@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agregar Libro</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 20px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      width: 300px;
+      margin: 0 auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Agregar Libro</h1>
+
+  <form id="add-book-form">
+    <label for="title">Título:</label>
+    <input type="text" id="title" name="title" required>
+
+    <label for="author">Autor:</label>
+    <input type="text" id="author" name="author" required>
+
+    <label for="genre">Género:</label>
+    <input type="text" id="genre" name="genre" required>
+
+    <label for="year">Año:</label>
+    <input type="number" id="year" name="year" required>
+
+    <button type="submit">Agregar</button>
+  </form>
+
+
+    <script>
+        document.getElementById('add-book-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+
+            const bookData = {
+                title: formData.get('title'),
+                author: formData.get('author'),
+                genre: formData.get('genre'),
+                year: parseInt(formData.get('year')),
+            };
+
+            const response = await fetch('/graphql', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    query: `
+                        mutation AddBook($title: String!, $author: String!, $genre: String!, $year: Int!) {
+                            addBook(title: $title, author: $author, genre: $genre, year: $year) {
+                                id
+                                title
+                                author
+                                genre
+                                year
+                            }
+                        }
+                    `,
+                    variables: bookData,
+                }),
+            });
+
+            const result = await response.json();
+            if (result.data.addBook) {
+                window.location.href = '/books';
+            } else {
+                alert('Error al agregar el libro.');
+            }
+        });
+    </script>
+</body>
+</html>

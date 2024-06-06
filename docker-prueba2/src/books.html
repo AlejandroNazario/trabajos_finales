@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Libros</title>
+</head>
+<body>
+    <h1>Lista de Libros</h1>
+    <ul id="book-list"></ul>
+
+    <script>
+        async function fetchBooks() {
+            const response = await fetch('/graphql', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    query: `
+                        query {
+                            getBooks {
+                                id
+                                title
+                                author
+                                genre
+                                year
+                            }
+                        }
+                    `,
+                }),
+            });
+
+            const result = await response.json();
+            const books = result.data.getBooks;
+            const bookList = document.getElementById('book-list');
+
+            books.forEach(book => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `Título: ${book.title}, Autor: ${book.author}, Género: ${book.genre}, Año: ${book.year}`;
+                bookList.appendChild(listItem);
+            });
+        }
+
+        fetchBooks().catch(error => console.error('Error al obtener los libros:', error));
+    </script>
+</body>
+</html>
